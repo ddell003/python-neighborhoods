@@ -105,6 +105,7 @@ class Neighborhood:
 
 
         print(self.__matrix)
+        print('\nTotal Cells: {}'.format(self.__cell_count))
 
 
 
