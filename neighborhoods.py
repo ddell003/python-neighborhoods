@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 """
 David Dell
-MET CS 521
 06/24/20
 Description:
+To run:  python3 neighborhoods.py
+
 """
 import os.path
 import numpy as np
@@ -30,12 +31,8 @@ class Neighborhood:
 
     # assume that all cells are negative unless otherwise specified
     # type is either positive or negative
-    # used for initially
     def set_positive_cell(self, x, y):
-        print('setting cell')
-        print('setting cell y {} x {}'.format(y, x))
         # row , column
-        self.__matrix[y][x] = int(1)
         self.set_cell(x,y, 1)
         # see if row has been set already
 
@@ -43,22 +40,28 @@ class Neighborhood:
             self.__positive_values.append([x,y])
         else:
             for i in range(len(self.__positive_values)):
-                #if its been set then see if its now negative and unslice it
-                if self.__positive_values[i] == [x,y] and cell_type == 0:
-                    self.__positive_values.pop(i)
-                elif self.__positive_values[i] != [x,y]:
+
+                if self.__positive_values[i] != [x,y]:
                     #else lets now set it
                     self.__positive_values.append([x,y])
 
     def set_cell(self, x, y, value):
 
         try:
+            # can remove out of try catch now, was relay on failure to catch out of range
+            if x > self.__width or y > self.__height or x < 0 or y < 0:
+                return
+            print('x {} rows {}'.format(x, self.__width))
             # if it fails then the grid space doesnt exist
+            print('setting cell y {} x {}'.format(y, x))
+            # only increase count if cell not set
+            if self.__matrix[y][x] == 0:
+                self.__cell_count = self.__cell_count + 1
+
             self.__matrix[y][x] = int(value)
-            #need to now check if cordinate has been counted before adding to count
-            self.__cell_count = self.__cell_count + 1
+
         except IndexError:
-            #index not found cnt
+            # index not found cnt
             self.__invalid_cell_count = self.__invalid_cell_count + 1
 
     def __set_matrix(self):
@@ -67,9 +70,6 @@ class Neighborhood:
 
 
     def run(self):
-        if self.__steps == 0:
-            print('1 Cell for 0 Steps')
-            return
 
         for town in self.__positive_values:
             count = 1;
@@ -84,17 +84,17 @@ class Neighborhood:
                 new_row_up = current_row + count
                 new_row_down = current_row - count
 
-                #next level stuff
+                # next level stuff
                 inner_count = 0
                 while inner_count <= self.__steps - count:
 
-                    #populate first column, gotta go left right up and down
+                    # populate first column, gotta go left right up and down
                     self.set_cell(new_column_right, current_row + inner_count, 2)
                     self.set_cell(new_column_left, current_row + inner_count, 2)
                     self.set_cell(new_column_right, current_row - inner_count, 2)
                     self.set_cell(new_column_left, current_row - inner_count, 2)
 
-                    #populate first row
+                    # populate first row
                     self.set_cell(current_column + inner_count, new_row_up, 2)
                     self.set_cell(current_column + inner_count, new_row_down, 2)
                     self.set_cell(current_column - inner_count, new_row_up, 2)
@@ -111,14 +111,13 @@ class Neighborhood:
 
 
 # steps, width, height
-n = Neighborhood(2, 11, 11)
+#n = Neighborhood(2, 10, 11)
 # x,y
-n.set_positive_cell(2,4)
-n.set_positive_cell(8,8)
-n.run()
+#n.set_positive_cell(2,4)
+#n.set_positive_cell(8,8)
+#n.run()
 
-#lets turn this into a program for the user to enter the values 
-"""
+# was setting up a program to prompt user to enter dimensions but I ran out of time
 if __name__ == '__main__':
 
     # start loop for over all program
@@ -146,4 +145,24 @@ if __name__ == '__main__':
                 print('You entered {}, Please Enter a valid dimension'.format(raw_array))
 
         # now need to prompt for position of positive numbers (could be many)
-"""
+        prompt_for_coordinates = True
+        while prompt_for_coordinates:
+
+            raw_array = input('Enter positive cell coordinates  X, Y separated by comas or X to exit: ')
+            array_input = raw_array.strip().split(',')
+            try:
+                if raw_array == 'X' or raw_array == 'x':
+                    prompt_for_coordinates = False
+                    break
+
+                x = int(array_input[0])
+                y = int(array_input[1])
+                neighborhood.set_positive_cell(x, y)
+                #prompt_for_array_input = False
+            except:
+                print('You entered {}, Please Enter a valid dimension'.format(raw_array))
+
+
+        neighborhood.run()
+
+        break
